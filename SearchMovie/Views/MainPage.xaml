@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SearchMovie.Views.MainPage"
+             xmlns:viewmodel="clr-namespace:SearchMovie.ViewModels">
+
+    <ScrollView>
+        <Grid Padding="0" RowSpacing="15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <!-- Заголовок -->
+            <Label Grid.Row="0"
+                   Text="Ищите ФИЛЬМЫ!"
+                   Style="{StaticResource Headline}"
+                   SemanticProperties.HeadingLevel="Level1" />
+
+            <!-- Поле ввода (поиск) -->
+            <Entry Grid.Row="1"
+                   Placeholder="Введите название/имя актёра/жанр"
+                   Text="{Binding Query}"
+                   Margin="30,0"
+                   HeightRequest="40" />
+
+            <!-- Кнопка поиска -->
+            <Button Grid.Row="2"
+                    Text="Поиск"
+                    Command="{Binding SearchMoviesCommand}"
+                    HorizontalOptions="Fill"
+                    Margin="30,0"
+                    Padding="10"/>
+
+            <!-- Коллекция фильмов -->
+            <CollectionView Grid.Row="3"
+                            ItemsSource="{Binding MoviePreview}"
+                            Margin="0,10,0,0" 
+                            SelectionMode="None" >
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Padding="5, 0"
+                               Margin="5, 0, 5, 5"
+                               BorderColor="Gray"
+                               BackgroundColor="Transparent"
+                               CornerRadius="10">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Path=BindingContext.TapCommand, 
+                                Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                      CommandParameter="{Binding Id}"/>
+
+
+
+                            </Frame.GestureRecognizers>
+                            <Grid Padding="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Изображение -->
+                                <Image Grid.RowSpan="2"
+                                       Source="{Binding UrlLogo}"
+                                       Aspect="AspectFit"
+                                       WidthRequest="120" 
+                                        />
+
+                                <!-- Данные о фильме -->
+                                <StackLayout Grid.Column="1" Spacing="0" Padding="10">
+                                    <Label Text="{Binding Title}" FontSize="18" FontAttributes="Bold" />
+                                    <Label Text="{Binding Year}" FontSize="14" />
+                                    <Label Text="{Binding Genres, Converter={StaticResource ListToStringConverter}}"/>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Label Grid.Column="0" Text="Рейтинг:" FontSize="14"/>
+                                        <Label Grid.Column="1" Text="{Binding Rating}" FontSize="14"/>
+
+                                        <Label Grid.Column="0"
+                                               Grid.ColumnSpan="2"
+                                               Margin="0, 10, 0, 0"
+                                               Grid.Row="1"
+                                               Text="{Binding Overview}"
+                                               HorizontalOptions="FillAndExpand"
+                                               LineBreakMode="TailTruncation"
+                                               MaxLines="4" />
+                                    </Grid>
+                                </StackLayout>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </ScrollView>
+</ContentPage>

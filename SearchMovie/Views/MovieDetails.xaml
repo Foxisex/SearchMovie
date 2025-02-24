@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SearchMovie.Views.MovieDetails"
+             xmlns:viewmodel="clr-namespace:SearchMovie.ViewModels"
+             Title="Детали фильма">
+    <ScrollView>
+
+        <StackLayout Padding="20">
+
+            <Image Source="{Binding MovieDetails.UrlLogo}" WidthRequest="350"/>
+
+            <Label Text="{Binding MovieDetails.Title}" FontSize="24" FontAttributes="Bold"/>
+
+            <Grid RowSpacing="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Text="{Binding MovieDetails.Year}" FontSize="18" />
+                <Label Grid.Row="0" Grid.Column="1" Text="{Binding MovieDetails.Country}" FontSize="18" Margin="0,0,0,0"/>
+                <Label Grid.Row="1" Grid.Column="0" Text="Режисёр:"/>
+                <Label Grid.Row="1" Grid.Column="1" Text="{Binding MovieDetails.Director}"/>
+                <Label Grid.Row="2" Grid.Column="0" Text="Сценарист:"/>
+                <Label Grid.Row="2" Grid.Column="1" Text="{Binding MovieDetails.Screenwriter}" LineBreakMode="CharacterWrap"/>
+                <Label Grid.Row="3" Grid.Column="0" Text="Оценка:" />
+                <Label Grid.Row="3" Grid.Column="1" Text="{Binding MovieDetails.Rating}" />
+                <Label Grid.Row="4" Grid.Column="0" Text="Жанры:"/>
+                <Label Grid.Row="4" Grid.Column="1" Text="{Binding MovieDetails.Genres, Converter={StaticResource ListToStringConverter}}"/>
+                <Label Grid.Row="5" Grid.Column="0" Text="Актеры:"/>
+                <Label Grid.Row="5" Grid.Column="1" Text="{Binding MovieDetails.Actors, Converter={StaticResource ListToStringConverter}}"/>
+            </Grid>
+            <Label Text="Описание:"/>
+            <Label Text="{Binding MovieDetails.Overview}" HorizontalOptions="FillAndExpand" Padding="0,0,0,10"/>
+            <Button Text="Назад" Command="{Binding GoBackCommand}" Margin="0,0,0,0"/>
+        </StackLayout>
+    </ScrollView>
+</ContentPage>
