@@ -15,7 +15,7 @@
             </Grid.RowDefinitions>
             <!-- Заголовок -->
             <Label Grid.Row="0"
-                   Text="Ищите ФИЛЬМЫ!"
+                   Text="Поиск фильмов"
                    Style="{StaticResource Headline}"
                    SemanticProperties.HeadingLevel="Level1" />
 
