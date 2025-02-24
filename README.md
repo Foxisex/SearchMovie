@@ -10,17 +10,6 @@
 - **Навигация** — реализована с использованием **Shell Navigation**.
 - **Паттерн MVVM** — логика отделена от UI, используется **CommunityToolkit.MVVM**.
 
-## Скриншоты
-<p align="center">
-<img src="Images/SearchExample_Title.jpg" width="300">
-<img src="Images/SearchExample_Actor.jpg" width="300">
-<img src="Images/SearchExample_Genre.jpg" width="300">
-</p>
-
-<p align="center">
-<img src="Images/MovieDetails.jpg" width="300">
-</p>
-
 ## Технологии и инструменты
 - **.NET MAUI** - кроссплатформенная разработка.
 - **SQLite** - локальная база данных.
@@ -66,4 +55,13 @@ FROM MoviesFTS
 WHERE MoviesFTS MATCH @searchTerm
 LIMIT 30;
 ```
+## Скриншоты
+<p align="center">
+<img src="Images/SearchExample_Title.jpg" width="300">
+<img src="Images/SearchExample_Actor.jpg" width="300">
+</p>
+<p align="center">
+<img src="Images/SearchExample_Genre.jpg" width="300">
+<img src="Images/MovieDetails.jpg" width="300">
+</p>
 
