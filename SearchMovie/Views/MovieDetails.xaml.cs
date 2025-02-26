@@ -9,4 +9,5 @@ public partial class MovieDetails : ContentPage
 		InitializeComponent();
 		BindingContext = vm;
 	}
+
 }

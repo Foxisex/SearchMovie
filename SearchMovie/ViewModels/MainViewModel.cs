@@ -1,49 +1,65 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using System.Windows.Input;
 using SearchMovie.Services;
-using SQLiteClassLibrary.Models;
 using SQLiteClassLibrary.Models.DTO;
 using SearchMovie.Views;
+using Microsoft.Maui.Controls;
 
 namespace SearchMovie.ViewModels
 {
-    public partial class MainViewModel : ObservableObject
+    public partial class MainViewModel : INotifyPropertyChanged
     {
         private readonly SearchService _movieService;
+        private string? _query;
 
         public MainViewModel(SearchService movieService)
         {
             _movieService = movieService;
-            MoviePreview = new ObservableCollection<MoviePreviewDTO>();
+            MoviePreview = [];
+
+            SearchMoviesCommand = new Command(async () => await SearchMoviesAsync());
+            TapCommand = new Command<int>(async (id) => await TapAsync(id));
         }
 
-        public ObservableCollection<MoviePreviewDTO> MoviePreview { get; set; }
+        public ObservableCollection<MoviePreviewDTO> MoviePreview { get; }
 
-        [ObservableProperty]
-        private string? _query;
-
-        [RelayCommand] 
-        public async Task SearchMoviesAsync()
+        public string? Query
         {
-            _query = Regex.Replace(_query ?? "", "[^\\p{L}0-9 ]", "").Trim();
+            get => _query;
+            set
+            {
+                if (_query != value)
+                {
+                    _query = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
-            if (_query.Length == 0)
+        public ICommand SearchMoviesCommand { get; }
+        public ICommand TapCommand { get; }
+
+        private async Task SearchMoviesAsync()
+        {
+            Query = Regex.Replace(Query ?? "", "[^\\p{L}0-9 ]", "").Trim();
+
+            if (string.IsNullOrWhiteSpace(Query))
             {
                 return;
             }
+
             // Очищаем предыдущие результаты
             MoviePreview.Clear();
 
             // Выполняем поиск
-            var movies = await _movieService.SearchMoviesAsync(_query);
+            var movies = await _movieService.SearchMoviesAsync(Query);
+
             // Добавляем найденные фильмы в коллекцию
             foreach (var movie in movies)
             {
@@ -59,10 +75,22 @@ namespace SearchMovie.ViewModels
                 });
             }
         }
-        [RelayCommand]
-        public async Task TapAsync(int id)
+
+        private async Task TapAsync(int id)
         {
-            await Shell.Current.GoToAsync($"{nameof(MovieDetails)}?Id={id}");
+            var parameters = new Dictionary<string, object>
+            {
+                { "Id", id }
+            };
+
+            await Shell.Current.GoToAsync(nameof(MovieDetails), parameters);
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

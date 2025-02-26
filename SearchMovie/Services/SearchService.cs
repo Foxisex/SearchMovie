@@ -49,7 +49,7 @@ namespace SearchMovie.Services
                 .Select(m => m.Title)  // Извлекаем только названия фильмов
                 .ToListAsync();
 
-            if (movieTitles.Count == 0) return new List<Movie>(); // Если ничего не найдено, сразу возвращаем пустой список
+            if (movieTitles.Count == 0) return []; // Если ничего не найдено, сразу возвращаем пустой список
 
             // Получаем полные данные фильмов
             var movies = await _context.Movies
