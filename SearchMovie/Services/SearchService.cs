@@ -18,49 +18,36 @@ namespace SearchMovie.Services
         {
             _context = context;
         }
-
-        // Метод для создания виртуальной таблицы FTS5
-        public async Task InitializeFTSAsync()
+        public async Task<List<MoviePreviewDTO>> SearchMoviesAsync(string searchTerm)
         {
-            await _context.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS MoviesFTS;");
-            await _context.Database.ExecuteSqlRawAsync(@"
-            CREATE VIRTUAL TABLE IF NOT EXISTS MoviesFTS USING fts5(Title, Genre, Actor);
-        ");
-        }
+            var query = await _context.Movies
+                .Where(m =>
+                    m.Title.Contains(searchTerm) ||
+                    m.MovieGenres.Any(mg => mg.Genre.Name.Contains(searchTerm)) ||
+                    m.MovieActors.Any(ma => ma.Actor.Name.Contains(searchTerm))
+                )
+                .Select(m => new MoviePreviewDTO
+                {
+                    Id = m.Id,
+                    Title = m.Title,
+                    Year = m.Year,
+                    Rating = m.Rating,
+                    UrlLogo = m.UrlLogo,
+                    Overview = m.Overview,
+                    Genres = m.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
+                    Actors = m.MovieActors.Select(ma => ma.Actor.Name).ToList()
+                })
+                .ToListAsync(); // Выполняем SQL-запрос, загружаем данные в память
 
-        public async Task SyncFTSDataAsync()
-        {
-            await _context.Database.ExecuteSqlRawAsync(@"
-        INSERT INTO MoviesFTS (Title, Genre, Actor)
-        SELECT m.Title, g.Name, a.Name
-        FROM Movies m
-        JOIN MovieGenres mg ON m.Id = mg.MovieId
-        JOIN Genres g ON mg.GenreId = g.Id
-        JOIN MovieActors ma ON m.Id = ma.MovieId
-        JOIN Actors a ON ma.ActorId = a.Id;
-    ");
-        }
+            // Теперь сортируем в памяти, потому что SQLite не умеет сортировать по `Contains()`
+            var sortedMovies = query
+                .OrderByDescending(m => m.Title.Contains(searchTerm))  // 1. Совпадение по названию
+                .ThenByDescending(mg => mg.Genres.Contains(searchTerm))  // 2. Совпадение по жанру
+                .ThenByDescending(ma => ma.Actors.Contains(searchTerm))  // 3. Совпадение по актёрам
+                .Take(20) // Ограничиваем 20 фильмами
+                .ToList();
 
-        public async Task<List<Movie>> SearchMoviesAsync(string searchTerm)
-        {
-            // Получаем уникальные названия фильмов из FTS5
-            var movieTitles = await _context.MoviesFTS
-                .FromSqlRaw($"SELECT DISTINCT Title FROM MoviesFTS WHERE MoviesFTS MATCH {{0}}", searchTerm).Take(30)
-                .Select(m => m.Title)  // Извлекаем только названия фильмов
-                .ToListAsync();
-
-            if (movieTitles.Count == 0) return []; // Если ничего не найдено, сразу возвращаем пустой список
-
-            // Получаем полные данные фильмов
-            var movies = await _context.Movies
-                .Where(m => movieTitles.Contains(m.Title)) // Фильтруем по найденным названиям
-                .Include(m => m.MovieGenres)
-                    .ThenInclude(mg => mg.Genre)
-                .Include(m => m.MovieActors)
-                    .ThenInclude(ma => ma.Actor)
-                .ToListAsync();
-
-            return movies;
+            return sortedMovies;
         }
 
         public async Task<MovieDetailsDTO> GetMovieByIdAsync(int id)

@@ -29,14 +29,6 @@ namespace SQLiteClassLibrary
         public DbSet<Genre> Genres { get; set; }
         public DbSet<MovieActor> MovieActors { get; set; }
         public DbSet<MovieGenre> MovieGenres { get; set; }
-        public DbSet<MovieFTS> MoviesFTS { get; set; }
-        public class MovieFTS
-        {
-            public string Title { get; set; }
-            public string Genre { get; set; }
-            public string Actor { get; set; }
-        }
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -67,7 +59,6 @@ namespace SQLiteClassLibrary
                 .HasOne(mg => mg.Genre)
                 .WithMany(g => g.MovieGenres)
                 .HasForeignKey(mg => mg.GenreId);
-            modelBuilder.Entity<MovieFTS>().HasNoKey();
         }
 
     }

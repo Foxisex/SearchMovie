@@ -54,25 +54,13 @@ namespace SearchMovie.ViewModels
                 return;
             }
 
+            var results = await _movieService.SearchMoviesAsync(Query);
             // Очищаем предыдущие результаты
             MoviePreview.Clear();
 
-            // Выполняем поиск
-            var movies = await _movieService.SearchMoviesAsync(Query);
-
-            // Добавляем найденные фильмы в коллекцию
-            foreach (var movie in movies)
+            foreach (var movie in results)
             {
-                MoviePreview.Add(new MoviePreviewDTO
-                {
-                    Id = movie.Id,
-                    Title = movie.Title,
-                    Year = movie.Year,
-                    Rating = movie.Rating,
-                    Overview = movie.Overview,
-                    UrlLogo = movie.UrlLogo,
-                    Genres = movie.MovieGenres.Select(mg => mg.Genre.Name).ToList()
-                });
+                MoviePreview.Add(movie);
             }
         }
 

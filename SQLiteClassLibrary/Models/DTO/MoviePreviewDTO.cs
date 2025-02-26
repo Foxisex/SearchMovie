@@ -15,8 +15,6 @@ namespace SQLiteClassLibrary.Models.DTO
         public string Overview { get; set; }
         public string UrlLogo { get; set; }
         public List<string> Genres { get; set; }
-        //public string Genres { get; set; }
-
-
+        public List<string> Actors { get; set; }
     }
 }

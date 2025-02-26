@@ -21,8 +21,6 @@ namespace SearchMovie
             base.OnStart();
             SQLitePCL.Batteries_V2.Init();
             var searchService = _serviceProvider.GetRequiredService<SearchService>();
-            await searchService.InitializeFTSAsync();
-            await searchService.SyncFTSDataAsync();
             await DataSeederInitializeAsync();
         }
 
