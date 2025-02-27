@@ -14,11 +14,7 @@ namespace SearchMovie.ViewModels
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public MovieDetailsViewModel(SearchService searchService)
-        {
-            _searchService = searchService;
-            GoBackCommand = new Command(async () => await MovieDetailsViewModel.GoBackAsync());
-        }
+        public ICommand GoBackCommand { get; }
 
         public int Id
         {
@@ -29,25 +25,28 @@ namespace SearchMovie.ViewModels
                 {
                     _id = value;
                     OnPropertyChanged();
-                    _ = LoadMovieAsync(); // Загружаем фильм при изменении Id
+                    _ = LoadMovieAsync();
                 }
             }
         }
 
-        public MovieDetailsDTO MovieDetails
+        public int Year => _movieDetails?.Year ?? 0;
+        public string Country => _movieDetails?.Country;
+        public string Director => _movieDetails?.Director;
+        public string Screenwriter => _movieDetails?.Screenwriter;
+        public double Rating => _movieDetails?.Rating ?? 0;
+        public List<string> Genres => _movieDetails != null ? _movieDetails.Genres : [];
+        public List<string> Actors => _movieDetails != null ? _movieDetails.Actors : [];
+        public string Overview => _movieDetails?.Overview;
+        public string UrlLogo => _movieDetails?.UrlLogo;
+        public string Title => _movieDetails?.Title;
+
+        // Конструктор
+        public MovieDetailsViewModel(SearchService searchService)
         {
-            get => _movieDetails;
-            set
-            {
-                if (_movieDetails != value)
-                {
-                    _movieDetails = value;
-                    OnPropertyChanged();
-                }
-            }
+            _searchService = searchService;
+            GoBackCommand = new Command(async () => await GoBackAsync());
         }
-
-        public ICommand GoBackCommand { get; }
 
         public static async Task GoBackAsync()
         {
@@ -58,7 +57,17 @@ namespace SearchMovie.ViewModels
         {
             if (Id > 0)
             {
-                MovieDetails = await _searchService.GetMovieByIdAsync(Id);
+                _movieDetails = await _searchService.GetMovieByIdAsync(Id);
+                OnPropertyChanged(nameof(Year));
+                OnPropertyChanged(nameof(Country));
+                OnPropertyChanged(nameof(Director));
+                OnPropertyChanged(nameof(Screenwriter));
+                OnPropertyChanged(nameof(Rating));
+                OnPropertyChanged(nameof(Genres));
+                OnPropertyChanged(nameof(Actors));
+                OnPropertyChanged(nameof(Overview));
+                OnPropertyChanged(nameof(UrlLogo));
+                OnPropertyChanged(nameof(Title));
             }
         }
 
@@ -67,7 +76,6 @@ namespace SearchMovie.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        // Получаем параметр "Id" из Shell
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.TryGetValue("Id", out object? value))

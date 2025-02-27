@@ -15,18 +15,11 @@ namespace SearchMovie.ViewModels
 {
     public partial class MainViewModel : INotifyPropertyChanged
     {
+        // Поля
         private readonly SearchService _movieService;
         private string? _query;
 
-        public MainViewModel(SearchService movieService)
-        {
-            _movieService = movieService;
-            MoviePreview = [];
-
-            SearchMoviesCommand = new Command(async () => await SearchMoviesAsync());
-            TapCommand = new Command<int>(async (id) => await TapAsync(id));
-        }
-
+        // Свойства
         public ObservableCollection<MoviePreviewDTO> MoviePreview { get; }
 
         public string? Query
@@ -42,9 +35,24 @@ namespace SearchMovie.ViewModels
             }
         }
 
+        // Команды
         public ICommand SearchMoviesCommand { get; }
         public ICommand TapCommand { get; }
 
+        // Конструктор
+        public MainViewModel(SearchService movieService)
+        {
+            _movieService = movieService;
+            MoviePreview = [];
+
+            SearchMoviesCommand = new Command(async () => await SearchMoviesAsync());
+            TapCommand = new Command<int>(async (id) => await TapAsync(id));
+        }
+
+        // Публичные методы
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        // Приватные методы
         private async Task SearchMoviesAsync()
         {
             Query = Regex.Replace(Query ?? "", "[^\\p{L}0-9 ]", "").Trim();
@@ -74,8 +82,7 @@ namespace SearchMovie.ViewModels
             await Shell.Current.GoToAsync(nameof(MovieDetails), parameters);
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
+        // Реализация INotifyPropertyChanged
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
