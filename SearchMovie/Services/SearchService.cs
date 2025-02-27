@@ -14,30 +14,38 @@ namespace SearchMovie.Services
         }
         public async Task<List<MoviePreviewDTO>> SearchMoviesAsync(string searchTerm, int pageSize = 20)
         {
+            searchTerm = $"%{searchTerm}%";
+
             var query = await _context.Movies
                 .AsNoTracking()
                 .Where(m =>
-                    EF.Functions.Like(m.Title, $"%{searchTerm}%") ||
-                    m.MovieGenres.Any(mg => EF.Functions.Like(mg.Genre.Name, $"%{searchTerm}%")) ||
-                    m.MovieActors.Any(ma => EF.Functions.Like(ma.Actor.Name, $"%{searchTerm}%"))
+                    EF.Functions.Like(m.Title, searchTerm) ||
+                    m.MovieGenres.Any(mg => EF.Functions.Like(mg.Genre.Name, searchTerm)) ||
+                    m.MovieActors.Any(ma => EF.Functions.Like(ma.Actor.Name, searchTerm))
                 )
-                .Select(m => new MoviePreviewDTO
+                .Select(m => new
                 {
-                    Id = m.Id,
-                    Title = m.Title,
-                    Year = m.Year,
-                    Rating = m.Rating,
-                    UrlLogo = m.UrlLogo,
-                    Overview = m.Overview,
-                    Genres = m.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
-                    Actors = m.MovieActors.Select(ma => ma.Actor.Name).ToList()
+                    Movie = m,
+                    Genres = m.MovieGenres.Select(mg => mg.Genre.Name),
+                    Actors = m.MovieActors.Select(ma => ma.Actor.Name)
                 })
-                .OrderByDescending(m => m.Title.Contains(searchTerm))
-                .ThenByDescending(mg => mg.Genres.Contains(searchTerm))
-                .ThenByDescending(ma => ma.Actors.Contains(searchTerm))
+                .OrderByDescending(m => EF.Functions.Like(m.Movie.Title, searchTerm))
+                .ThenByDescending(m => m.Genres.Any(g => EF.Functions.Like(g, searchTerm)))
+                .ThenByDescending(m => m.Actors.Any(a => EF.Functions.Like(a, searchTerm)))
                 .Take(pageSize)
                 .ToListAsync();
-            return query;
+
+            return query.Select(m => new MoviePreviewDTO
+            {
+                Id = m.Movie.Id,
+                Title = m.Movie.Title,
+                Year = m.Movie.Year,
+                Rating = m.Movie.Rating,
+                UrlLogo = m.Movie.UrlLogo,
+                Overview = m.Movie.Overview,
+                Genres = m.Genres.Distinct().ToList(),
+                Actors = m.Actors.Distinct().ToList()
+            }).ToList();
         }
 
         public async Task<MovieDetailsDTO> GetMovieByIdAsync(int id)
