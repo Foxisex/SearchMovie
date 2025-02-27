@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using SQLiteClassLibrary.Models;
+﻿using SQLiteClassLibrary.Models;
 using SQLiteClassLibrary;
 using SQLiteClassLibrary.Models.DTO;
 using Microsoft.EntityFrameworkCore;
 using CsvHelper;
 using System.Globalization;
-using System.Diagnostics;
 
 
 namespace SearchMovie.Services

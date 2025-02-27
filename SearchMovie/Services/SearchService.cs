@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SQLiteClassLibrary.Models;
-using SQLiteClassLibrary;
+﻿using SQLiteClassLibrary;
 using Microsoft.EntityFrameworkCore;
 using SQLiteClassLibrary.Models.DTO;
 
@@ -18,13 +12,14 @@ namespace SearchMovie.Services
         {
             _context = context;
         }
-        public async Task<List<MoviePreviewDTO>> SearchMoviesAsync(string searchTerm)
+        public async Task<List<MoviePreviewDTO>> SearchMoviesAsync(string searchTerm, int pageSize = 20)
         {
             var query = await _context.Movies
+                .AsNoTracking()
                 .Where(m =>
-                    m.Title.Contains(searchTerm) ||
-                    m.MovieGenres.Any(mg => mg.Genre.Name.Contains(searchTerm)) ||
-                    m.MovieActors.Any(ma => ma.Actor.Name.Contains(searchTerm))
+                    EF.Functions.Like(m.Title, $"%{searchTerm}%") ||
+                    m.MovieGenres.Any(mg => EF.Functions.Like(mg.Genre.Name, $"%{searchTerm}%")) ||
+                    m.MovieActors.Any(ma => EF.Functions.Like(ma.Actor.Name, $"%{searchTerm}%"))
                 )
                 .Select(m => new MoviePreviewDTO
                 {
@@ -37,17 +32,12 @@ namespace SearchMovie.Services
                     Genres = m.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
                     Actors = m.MovieActors.Select(ma => ma.Actor.Name).ToList()
                 })
-                .ToListAsync(); // Выполняем SQL-запрос, загружаем данные в память
-
-            // Теперь сортируем в памяти, потому что SQLite не умеет сортировать по `Contains()`
-            var sortedMovies = query
-                .OrderByDescending(m => m.Title.Contains(searchTerm))  // 1. Совпадение по названию
-                .ThenByDescending(mg => mg.Genres.Contains(searchTerm))  // 2. Совпадение по жанру
-                .ThenByDescending(ma => ma.Actors.Contains(searchTerm))  // 3. Совпадение по актёрам
-                .Take(20) // Ограничиваем 20 фильмами
-                .ToList();
-
-            return sortedMovies;
+                .OrderByDescending(m => m.Title.Contains(searchTerm))
+                .ThenByDescending(mg => mg.Genres.Contains(searchTerm))
+                .ThenByDescending(ma => ma.Actors.Contains(searchTerm))
+                .Take(pageSize)
+                .ToListAsync();
+            return query;
         }
 
         public async Task<MovieDetailsDTO> GetMovieByIdAsync(int id)
